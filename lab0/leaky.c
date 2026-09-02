@@ -16,6 +16,7 @@ int main(void) {
         int *nums = create_numbers(100);
         printf("Iteration %d: first = %d, last = %d\n",
                j, nums[0], nums[99]);
+	free(nums);
     }
     return 0;
 }
