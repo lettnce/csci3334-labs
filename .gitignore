@@ -1,4 +1,10 @@
-*.o
-*.exe
-*.out
-*.app
+*
+
+!**/Makefiel
+!Makefile
+
+!*/
+
+!*.*
+
+!.gitignore
