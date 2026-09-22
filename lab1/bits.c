@@ -20,7 +20,13 @@
  *   Rating: 1
  */
 int bitXor(int x, int y) {
-    return 2;
+
+    // 4 - 0100
+    // 5 - 0101
+    // 1 - 0001
+    int step_1 = (~x&y);
+    int step_2 = (x&~y);
+    return ~(~step_1&~step_2);
 }
 
 /*
@@ -30,18 +36,19 @@ int bitXor(int x, int y) {
  *   Rating: 1
  */
 int tmin(void) {
-    return 2;
+    return 1 << 31;
 }
 
 /*
  * isTmax - returns 1 if x is the maximum two's complement integer,
- *   and 0 otherwise
- *   Legal ops: ! ~ & ^ | +
+ *   and 0 otherwise          // 0111 1111 ... 1111 1111
+ *   Legal ops: ! ~ & ^ | +   // 1000 0000 ... 0000 0000
  *   Max ops: 10
  *   Rating: 1
  */
-int isTmax(int x) {
-    return 2;
+int isTmax(int x){
+    int neg1 = !(~x);
+    return !(~(x + 1) ^ x | neg1); 
 }
 
 /*
@@ -52,8 +59,10 @@ int isTmax(int x) {
  *   Max ops: 12
  *   Rating: 2
  */
-int allOddBits(int x) {
-    return 2;
+int allOddBits(int x) { // 2, 8, 32, 128, 512, 2048, etc...
+    int mask = 0xAA | (0xAA << 8);
+    mask = mask | (mask << 16);
+    return !((x & mask)^mask);
 }
 
 /*
@@ -64,7 +73,7 @@ int allOddBits(int x) {
  *   Rating: 2
  */
 int negate(int x) {
-    return 2;
+    return ~x + 1;
 }
 
 /*
@@ -75,7 +84,9 @@ int negate(int x) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-    return 2;
+    int high = !((x >> 4) ^ 0x3);
+    int low = !(((x & 0xF) + 0x6) >> 4);
+    return high & low;
 }
 
 /*
@@ -86,7 +97,8 @@ int isAsciiDigit(int x) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-    return 2;
+    int mask = (!x) + ~0;
+    return (mask & y) | (~mask & z);
 }
 
 /*
@@ -97,7 +109,16 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-    return 2;
+    int x_sign_bit = (x >> 31) & 1;
+    int y_sign_bit = (y >> 31) & 1;
+    // if sign bits differ, x smaller when negative
+    // if same, inspect y + (~x + 1)
+    int calc = y + (~x + 1);
+    int alt_sign_bit = (calc >> 31) & 1;
+
+    int diff_or_equal = x_sign_bit^y_sign_bit; // if different, return 1 else return 0
+
+    return some calculation | alt_sign_bit;
 }
 
 /*
