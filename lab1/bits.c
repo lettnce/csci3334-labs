@@ -115,10 +115,12 @@ int isLessOrEqual(int x, int y) {
     // if same, inspect y + (~x + 1)
     int calc = y + (~x + 1);
     int alt_sign_bit = (calc >> 31) & 1;
+    int diff_or_equal = x_sign_bit ^ y_sign_bit;
 
-    int diff_or_equal = x_sign_bit^y_sign_bit; // if different, return 1 else return 0
+    int not_diff = diff_or_equal ^ 1;   // logical NOT (operands are 0/1)
+    int not_alt  = alt_sign_bit ^ 1;
 
-    return some calculation | alt_sign_bit;
+    return (diff_or_equal & x_sign_bit) | (not_diff & not_alt);
 }
 
 /*
@@ -132,7 +134,12 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
-    return 2;
+    unsigned exp  = uf & 0x7F800000;
+    unsigned frac = uf & 0x007FFFFF;
+    if (exp == 0x7F800000 && frac != 0) return uf;
+    // NaN: return unchanged
+    // flip sign bit
+    return uf ^ 0x80000000;                          
 }
 
 /*
@@ -162,7 +169,24 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 int howManyBits(int x) {
-    return 2;
+    int b16, b8, b4, b2, b1, b0;
+    int sign = x >> 31;
+    x = (sign & ~x) | (~sign & x);   
+    // invert if negative, else keep
+
+    b16 = !!(x >> 16) << 4;  
+    x = x >> b16;
+    b8  = !!(x >> 8)  << 3;  
+    x = x >> b8;
+    b4  = !!(x >> 4)  << 2;  
+    x = x >> b4;
+    b2  = !!(x >> 2)  << 1;  
+    x = x >> b2;
+    b1  = !!(x >> 1);        
+    x = x >> b1;
+    b0  = x;
+
+    return b16 + b8 + b4 + b2 + b1 + b0 + 1;
 }
 
 /* float_f2i - Return bit-level equivalent of (int) f for floating point
