@@ -1,0 +1,224 @@
+# t6-coalesce.tr (Level 2): free a run of blocks in both directions,
+# then ask for one block as big as the whole run.
+
+a 0 64
+a 1 64
+a 2 64
+a 3 64
+a 4 64
+a 5 64
+a 6 64
+a 7 64
+a 8 64
+a 9 64
+a 10 64
+a 11 64
+a 12 64
+a 13 64
+a 14 64
+a 15 64
+a 16 64
+a 17 64
+a 18 64
+a 19 64
+a 20 64
+a 21 64
+a 22 64
+a 23 64
+a 24 64
+a 25 64
+a 26 64
+a 27 64
+a 28 64
+a 29 64
+a 30 64
+a 31 64
+a 32 64
+a 33 64
+a 34 64
+a 35 64
+a 36 64
+a 37 64
+a 38 64
+a 39 64
+a 40 64
+a 41 64
+a 42 64
+a 43 64
+a 44 64
+a 45 64
+a 46 64
+a 47 64
+a 48 64
+a 49 64
+a 50 16
+h 4040
+f 49
+f 48
+f 47
+f 46
+f 45
+f 44
+f 43
+f 42
+f 41
+f 40
+f 39
+f 38
+f 37
+f 36
+f 35
+f 34
+f 33
+f 32
+f 31
+f 30
+f 29
+f 28
+f 27
+f 26
+f 25
+f 24
+f 23
+f 22
+f 21
+f 20
+f 19
+f 18
+f 17
+f 16
+f 15
+f 14
+f 13
+f 12
+f 11
+f 10
+f 9
+f 8
+f 7
+f 6
+f 5
+f 4
+f 3
+f 2
+f 1
+f 0
+a 51 3984
+
+# Fifty 80-byte blocks were freed from the LAST to the FIRST, so each one
+# had a free block right AFTER it. Merged, they make one 4000-byte block,
+# which this 3984-byte request fits exactly. If the heap grew, free did
+# not merge a block with the free block after it.
+h 4040
+f 51
+a 52 64
+a 53 64
+a 54 64
+a 55 64
+a 56 64
+a 57 64
+a 58 64
+a 59 64
+a 60 64
+a 61 64
+a 62 64
+a 63 64
+a 64 64
+a 65 64
+a 66 64
+a 67 64
+a 68 64
+a 69 64
+a 70 64
+a 71 64
+a 72 64
+a 73 64
+a 74 64
+a 75 64
+a 76 64
+a 77 64
+a 78 64
+a 79 64
+a 80 64
+a 81 64
+a 82 64
+a 83 64
+a 84 64
+a 85 64
+a 86 64
+a 87 64
+a 88 64
+a 89 64
+a 90 64
+a 91 64
+a 92 64
+a 93 64
+a 94 64
+a 95 64
+a 96 64
+a 97 64
+a 98 64
+a 99 64
+a 100 64
+a 101 64
+
+# That 4000-byte block was freed, and fifty 64-byte requests were carved
+# out of it again (this needs splitting), so the heap must not grow.
+h 4040
+f 52
+f 53
+f 54
+f 55
+f 56
+f 57
+f 58
+f 59
+f 60
+f 61
+f 62
+f 63
+f 64
+f 65
+f 66
+f 67
+f 68
+f 69
+f 70
+f 71
+f 72
+f 73
+f 74
+f 75
+f 76
+f 77
+f 78
+f 79
+f 80
+f 81
+f 82
+f 83
+f 84
+f 85
+f 86
+f 87
+f 88
+f 89
+f 90
+f 91
+f 92
+f 93
+f 94
+f 95
+f 96
+f 97
+f 98
+f 99
+f 100
+f 101
+a 102 3984
+
+# This time the fifty blocks were freed from the FIRST to the LAST, so
+# each one had a free block right BEFORE it. Merging with the block
+# before needs that block's footer (prev_footer). If the heap grew here
+# but not at the first check, the forward merge works and this one does not.
+h 4040

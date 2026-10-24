@@ -3,7 +3,7 @@
 #   make          build them for THIS machine (whatever it is)
 #   make run      run them all in order (03-divide may be killed; that is the point)
 #   make linux    the two Linux x86-64 only programs: 01-privileged and 04-hello
-#   make gpu      11-launches.cu, for the AI slide (needs an NVIDIA GPU and nvcc)
+#   make gpu      11-launches.cu and 12-gpu-printf.cu, for the GPU slides (needs an NVIDIA GPU and nvcc)
 #   make clean
 #
 # Most of these run anywhere. The ones that are about Linux itself are not:
@@ -38,11 +38,12 @@ linux: 01-privileged.c 04-hello.s
 
 # Not part of `all`: it needs an NVIDIA GPU. -arch=native builds for the GPU
 # in this machine.
-gpu: 11-launches.cu
-	nvcc -O2 -arch=native $< -o 11-launches
+gpu: 11-launches.cu 12-gpu-printf.cu
+	nvcc -O2 -arch=native 11-launches.cu -o 11-launches
+	nvcc -O2 -arch=native 12-gpu-printf.cu -o 12-gpu-printf
 
 clean:
-	rm -f $(PROGS) 01-privileged 04-hello 11-launches *.o *.txt
+	rm -f $(PROGS) 01-privileged 04-hello 11-launches 12-gpu-printf *.o *.txt
 	rm -rf *.dSYM
 
 .PHONY: all run linux gpu clean

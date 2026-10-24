@@ -1,0 +1,156 @@
+# t5-split.tr (Level 2): small requests carved out of one big free block.
+
+a 0 4000
+f 0
+
+# A 4000-byte request makes one 4016-byte block, which is now free.
+h 4024
+a 1 48
+a 2 48
+a 3 48
+a 4 48
+a 5 48
+a 6 48
+a 7 48
+a 8 48
+a 9 48
+a 10 48
+a 11 48
+a 12 48
+a 13 48
+a 14 48
+a 15 48
+a 16 48
+a 17 48
+a 18 48
+a 19 48
+a 20 48
+a 21 48
+a 22 48
+a 23 48
+a 24 48
+a 25 48
+a 26 48
+a 27 48
+a 28 48
+a 29 48
+a 30 48
+a 31 48
+a 32 48
+a 33 48
+a 34 48
+a 35 48
+a 36 48
+a 37 48
+a 38 48
+a 39 48
+a 40 48
+a 41 48
+a 42 48
+a 43 48
+a 44 48
+a 45 48
+a 46 48
+a 47 48
+a 48 48
+a 49 48
+a 50 48
+a 51 48
+a 52 48
+a 53 48
+a 54 48
+a 55 48
+a 56 48
+a 57 48
+a 58 48
+a 59 48
+a 60 48
+
+# Sixty 48-byte requests need 64-byte blocks: 3840 bytes in all, which
+# fits in the free 4016-byte block. Each request must split off only the
+# 64 bytes it needs, so the heap must not grow.
+h 4024
+f 3
+f 51
+f 53
+f 29
+f 44
+f 40
+f 1
+f 12
+f 33
+f 25
+f 8
+f 32
+f 41
+f 55
+f 39
+f 38
+f 58
+f 23
+f 11
+f 30
+f 20
+f 19
+f 4
+f 46
+f 2
+f 5
+f 7
+f 9
+f 50
+f 35
+f 42
+f 22
+f 43
+f 49
+f 54
+f 37
+f 17
+f 52
+f 34
+f 57
+a 61 32
+a 62 16
+a 63 16
+a 64 32
+a 65 32
+a 66 16
+a 67 32
+a 68 16
+a 69 32
+a 70 16
+a 71 32
+a 72 32
+a 73 16
+a 74 32
+a 75 16
+a 76 16
+a 77 16
+a 78 16
+a 79 16
+a 80 16
+a 81 32
+a 82 16
+a 83 16
+a 84 32
+a 85 16
+a 86 32
+a 87 32
+a 88 32
+a 89 32
+a 90 32
+a 91 32
+a 92 32
+a 93 32
+a 94 32
+a 95 32
+a 96 32
+a 97 32
+a 98 32
+a 99 32
+a 100 16
+
+# Forty blocks were freed and forty smaller requests followed. Each fits
+# in a freed block, so the heap must still not grow.
+h 4024

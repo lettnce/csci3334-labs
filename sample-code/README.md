@@ -15,6 +15,7 @@ sample code/
   lecture07/   jumps, the stack, calls and recursion (+ a GPU warp-divergence demo)
   lecture08/   buffer overflows, defenses and undefined behaviour
   lecture09/   the kernel: exceptions, system calls and processes (+ a GPU demo)
+  lecture10/   virtual memory: page faults, mmap, copy-on-write and protection
 ```
 
 ## Lecture 2
@@ -143,7 +144,7 @@ binaries themselves will not run there.
 | File | Slides |
 |------|--------|
 | `01-first-look.c` | Run It: Get the Assembly Yourself · Run It: One Line of C, One Addressing Mode · Your First Whole Function · A Loop, Line by Line · Run It: The Bytes Are Right There |
-| `02-lea.c` | Run It: `lea` as the Cheap Multiplier |
+| `02-lea.c` | Run It: `lea` Builds Small Multiples |
 | `03-shapes.c` | The Four Shapes, in a Register |
 | `04-sizes.c` | Run It: Writing Through the Narrow Names |
 
@@ -190,7 +191,7 @@ Linux VM, or the lab machines). `strace` and `/proc` exist only on Linux.
 make          # everything that runs on any machine
 make run
 make linux    # 01-privileged and 04-hello: Linux x86-64 only
-make gpu      # 11-launches: needs an NVIDIA GPU and nvcc
+make gpu      # 11-launches and 12-gpu-printf: need an NVIDIA GPU and nvcc
 ```
 
 | File | Slides |
@@ -204,9 +205,32 @@ make gpu      # 11-launches: needs an NVIDIA GPU and nvcc
 | `07-buffering.c` | Run It: 1000 `printf` Calls, How Many `write`s? |
 | `08-syscall-cost.c` | Run It: What a System Call Costs |
 | `09-pid.c` | Run It: Every Process Has a Number |
-| `10-context-switches.c` | Run It: Counting Context Switches (use Linux; macOS counts differently) |
-| `11-launches.cu` | AI Systems Connection |
+| `10-context-switches.c` | Run It: Counting Context Switches · What the Context Switch Counts Show (use Linux; macOS counts differently) |
+| `11-launches.cu` | AI Systems Connection (what a kernel launch costs) |
+| `12-gpu-printf.cu` | Think About It: `printf` on the GPU · `printf` on the GPU: The CPU Does the Printing |
 
 `01-privileged` and `03-divide` are meant to be killed by the kernel. That is
 what they demonstrate.
 
+## Lecture 10
+
+Everything builds and runs on Linux and macOS, but three things differ on a
+Mac. Apple Silicon pages are 16 KB, not 4 KB, so the fault counts in
+`01-page-faults-twice` and `05-cow` come out four times smaller. A write to a
+protected page ends the program with `SIGBUS`, not `SIGSEGV`. And there is no
+`/proc`, so `07-newlines` only counts.
+
+```bash
+make
+make run
+```
+
+| File | Slides |
+|------|--------|
+| `01-page-faults-twice.c` | Run It Again: Lecture 9's Page Faults |
+| `02-mmap-anon.c` | mmap: Memory Mapping |
+| `03-mmap-file.c` | mmap: Mapping a File |
+| `04-mmap-shared.c` | mmap: Shared Memory |
+| `05-cow.c` | Copy-on-Write · Copy-on-Write in the Page Tables · Practice 3 |
+| `06-protect.c` | Memory Protection · Practice 4 |
+| `07-newlines.c` | Practice 5 (and Answers to Practice 5) |

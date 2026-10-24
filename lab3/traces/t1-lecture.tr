@@ -1,0 +1,28 @@
+# t1-lecture.tr (Level 1): the Lecture 11 fragmentation example.
+# The handout walks through it request by request.
+
+
+# Build the heap from the Lecture 11 slide "Fragmentation":
+# four blocks of 32, 64, 32 and 96 bytes (requests of 16, 48, 16, 80).
+a 0 16
+a 1 48
+a 2 16
+a 3 80
+
+# 8 bytes of fence + 32 + 64 + 32 + 96 = 232.
+h 232
+
+# Free the 64- and 96-byte blocks: [Alloc 32][Free 64][Alloc 32][Free 96].
+f 1
+f 3
+a 4 112
+
+# A 112-byte request needs a 128-byte block. 160 bytes are free, but in
+# two pieces of 64 and 96, so no free block fits: the slide's external
+# fragmentation. The heap grows by one 128-byte block: 232 + 128 = 360.
+h 360
+a 5 40
+
+# A 40-byte request needs a 64-byte block. First fit finds the free
+# 64-byte block at heap+40 and reuses it, so the heap must not grow.
+h 360
