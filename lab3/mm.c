@@ -1,7 +1,7 @@
 /*
  * mm.c - Lab 3: a memory allocator.
  *
- * Name:
+ * Name: Aron Ledesma
  *
  * Design (Level 5: replace this paragraph with a few sentences of your own):
  * how a free block is found, when a block is split, when blocks are
@@ -107,9 +107,8 @@ HELPER void set_block(Header *h, size_t size, int is_free)
  */
 static size_t block_size(size_t n)
 {
-    /* YOUR CODE HERE */
-    (void)n;
-    return 0;
+    size_t size = round_up(n);
+    return (n < MIN_BLOCK) ? MIN_BLOCK : size;
 }
 
 /*
@@ -120,8 +119,9 @@ static size_t block_size(size_t n)
  */
 static Header *find_fit(size_t size)
 {
-    /* YOUR CODE HERE */
-    (void)size;
+    for (Header *h = heap_start; !at_end(h); h = next_block(h))
+        if (h->is_free && h->size >= size)
+            return h;
     return NULL;
 }
 
@@ -133,9 +133,13 @@ static Header *find_fit(size_t size)
  */
 static Header *grow_heap(size_t size)
 {
-    /* YOUR CODE HERE */
-    (void)size;
-    return NULL;
+    if (mem_sbrk(size) == (void *)-1)
+        return NULL;
+    else {
+        set_block(heap_end, size, 1);
+        heap_end+=8;
+        return mem_sbrk(size);
+    }
 }
 
 /*
@@ -147,9 +151,7 @@ static Header *grow_heap(size_t size)
  */
 static void place(Header *h, size_t size)
 {
-    /* YOUR CODE HERE */
-    (void)h;
-    (void)size;
+    set_block(h, h->size, h->is_free = 0);
 }
 
 /* Start a new, empty heap: just the fence. Given. Called before each trace. */
