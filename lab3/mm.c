@@ -58,7 +58,8 @@ typedef Header Footer;
 
 #define ALIGNMENT 16
 #define OVERHEAD  (sizeof(Header) + sizeof(Footer))   /* 16 bytes per block */
-#define MIN_BLOCK 32       /* header + 16 bytes of payload + footer */
+#define MIN_BLOCK 32                                  /* header + 16 bytes of payload + footer */
+#define MIN(a, b) ((a) < (b) ? (a) : (b))             /* min function */
 
 static Header *heap_start;  /* the first block */
 static char   *heap_end;    /* one past the last byte of the last block */
@@ -244,23 +245,25 @@ void mm_free(void *p)
  *   n == 0:    same as mm_free(p), and return NULL
  */
 void *mm_realloc(void *p, size_t n)
-{
-    /* YOUR CODE HERE */
-    (void)p;
-    (void)n;
-    return NULL;
+{   
+    if (p == NULL) { return mm_malloc(n); }
+    if (n == 0) {
+        mm_free(p);
+        return NULL;
+    }
+    void *cpy = mm_malloc(n);
+    memcpy(cpy, p, MIN(header_of(p)->size - OVERHEAD, n));
+    set_block(header_of(p), header_of(p)->size, 1);
+    return cpy;
 }
-
 /*
  * nmemb * size bytes, all zero. Return NULL if nmemb * size does not fit in
  * a size_t: check that before you multiply.
  */
 void *mm_calloc(size_t nmemb, size_t size)
 {
-    /* YOUR CODE HERE */
-    (void)nmemb;
-    (void)size;
-    return NULL;
+    if (nmemb != 0 && size > SIZE_MAX / nmemb) { return NULL; }
+    else { return nmemb * size * 0; }
 }
 
 /* ==================================================================== */
