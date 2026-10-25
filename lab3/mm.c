@@ -155,7 +155,7 @@ static void place(Header *h, size_t size)
     size_t old = h->size;
     if (old - size >= MIN_BLOCK) {
         set_block(h, size, 0);
-        Header *next = (Header *)((char *) h + size);
+        Header *next = next_block(h);
         set_block(next, old - size, 1);
     }
     else
@@ -201,8 +201,29 @@ void *mm_malloc(size_t n)
  */
 static Header *coalesce(Header *h)
 {
-    /* YOUR CODE HERE */
-    return h;
+    // merging blocks based on free conditions (each case is a line or two)
+
+    // neither
+    if (!prev_footer(h)->is_free && !next_block(h)->is_free) { return h; }
+    // next only
+    else if (!at_end(next_block(h)) && next_block(h)->is_free && !prev_footer(h)->is_free) {
+        set_block(h, h->size + next_block(h)->size, 1);
+        return h;
+    }
+    // prev only
+    else if (!at_end(next_block(h)) && prev_footer(h)->is_free && !next_block(h)->is_free) {
+        set_block(prev_block(h), prev_block(h)->size + h->size, 1);
+        h = prev_block(h);
+        return h;
+    }
+    // both
+    else {
+        // size_t next_size = next_block(h)->size;
+        // set_block(prev_block(h), prev_block(h)->size + h->size, 1);
+        // h = prev_block(h);
+        // set_block(h, h->size + next_size, 1);
+        return h;
+    }
 }
 
 void mm_free(void *p)
