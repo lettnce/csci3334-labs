@@ -107,6 +107,7 @@ HELPER void set_block(Header *h, size_t size, int is_free)
  */
 static size_t block_size(size_t n)
 {
+    n+=16;
     size_t size = round_up(n);
     return (n < MIN_BLOCK) ? MIN_BLOCK : size;
 }
@@ -133,13 +134,13 @@ static Header *find_fit(size_t size)
  */
 static Header *grow_heap(size_t size)
 {
-    if (mem_sbrk(size) == (void *)-1)
+    int *br = mem_sbrk(size);
+    if (br == (void *)-1)
         return NULL;
-    else {
-        set_block(heap_end, size, 1);
-        heap_end+=8;
-        return mem_sbrk(size);
-    }
+
+    heap_end+=size;
+    set_block((Header *)br, size, 1);
+    return (Header *)br;
 }
 
 /*
@@ -151,9 +152,15 @@ static Header *grow_heap(size_t size)
  */
 static void place(Header *h, size_t size)
 {
-    set_block(h, h->size, h->is_free = 0);
+    size_t old = h->size;
+    if (old - size >= MIN_BLOCK) {
+        set_block(h, size, 0);
+        Header *next = (Header *)((char *) h + size);
+        set_block(next, old - size, 1);
+    }
+    else
+        set_block(h, old, 0);
 }
-
 /* Start a new, empty heap: just the fence. Given. Called before each trace. */
 int mm_init(void)
 {
@@ -204,6 +211,7 @@ void mm_free(void *p)
         return;
     Header *h = header_of(p);
     /* YOUR CODE HERE (Level 1): mark h free. */
+    set_block(h, h->size, 1);
 
     coalesce(h);   /* does nothing until you write coalesce at Level 2 */
 }
