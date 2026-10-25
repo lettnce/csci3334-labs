@@ -201,8 +201,7 @@ void *mm_malloc(size_t n)
  */
 static Header *coalesce(Header *h)
 {
-    // merging blocks based on free conditions (each case is a line or two)
-
+    // merging blocks based on free conditions
     // neither
     if (!prev_footer(h)->is_free && !next_block(h)->is_free) { return h; }
     // next only
@@ -213,17 +212,15 @@ static Header *coalesce(Header *h)
     // prev only
     else if (!at_end(next_block(h)) && prev_footer(h)->is_free && !next_block(h)->is_free) {
         set_block(prev_block(h), prev_block(h)->size + h->size, 1);
-        h = prev_block(h);
-        return h;
+        return prev_block(h);
     }
     // both
-    else {
-        // size_t next_size = next_block(h)->size;
-        // set_block(prev_block(h), prev_block(h)->size + h->size, 1);
-        // h = prev_block(h);
-        // set_block(h, h->size + next_size, 1);
-        return h;
+    else if (!at_end(next_block(h))) {
+        set_block(prev_block(h), prev_block(h)->size + h->size + next_block(h)->size, 1);
+        return prev_block(h);
     }
+    else { return NULL; }
+
 }
 
 void mm_free(void *p)
