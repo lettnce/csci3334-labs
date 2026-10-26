@@ -63,6 +63,7 @@ typedef Header Footer;
 
 static Header *heap_start;  /* the first block */
 static char   *heap_end;    /* one past the last byte of the last block */
+static Header *free_list;
 
 /* ---- Helpers (given). Each is one line of pointer arithmetic. -------- */
 
@@ -173,6 +174,7 @@ int mm_init(void)
     heap_start = (Header *)(fence + 1);
     heap_end = (char *)heap_start;
     /* Level 4: reset your free list(s) here too. */
+    free_list = NULL;
     return 0;
 }
 
