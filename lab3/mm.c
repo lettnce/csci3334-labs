@@ -263,7 +263,14 @@ void *mm_realloc(void *p, size_t n)
 void *mm_calloc(size_t nmemb, size_t size)
 {
     if (nmemb != 0 && size > SIZE_MAX / nmemb) { return NULL; }
-    else { return nmemb * size * 0; }
+    else {
+        size_t block_size = nmemb * size;
+        void *addr = mm_malloc(block_size);
+
+        if (addr) { memset(addr, 0, block_size); }
+
+        return addr;
+    }
 }
 
 /* ==================================================================== */
