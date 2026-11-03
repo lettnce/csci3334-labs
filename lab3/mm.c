@@ -7,6 +7,15 @@
  * how a free block is found, when a block is split, when blocks are
  * coalesced, and, if you did Level 4, how your free list works.
  *
+ * A free block is found by iterating through the heap and checking to see
+ * if 1) the block is free, and 2) if the size is greater than the size you with to allocate.
+ * A block is split when a request for a free block leaves a leftover thats at least MIN_BLOCK.
+ * The old block becomes allocated with the request size and the rest becomes a new block after it.
+ * Blocks are coalesced based on a set of free conditions. They are merged to whichever free block
+ * they're next to: if the next is free, merge. If the previous is free, merge. If the previous and 
+ * next are free, merge to both. If none are free, return the original.
+ *
+ *
  * Rules:
  *   - All memory comes from mem_sbrk(). Do not call malloc, calloc, realloc,
  *     free, sbrk or mmap, and do not declare global or static arrays.
