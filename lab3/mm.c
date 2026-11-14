@@ -58,7 +58,8 @@ typedef Header Footer;
 
 #define ALIGNMENT 16
 #define OVERHEAD  (sizeof(Header) + sizeof(Footer))   /* 16 bytes per block */
-#define MIN_BLOCK 32       /* header + 16 bytes of payload + footer */
+#define MIN_BLOCK 32                                  /* header + 16 bytes of payload + footer */
+#define MIN(a, b) ((a) < (b) ? (a) : (b))             /* min function */
 
 static Header *heap_start;  /* the first block */
 static char   *heap_end;    /* one past the last byte of the last block */
@@ -155,7 +156,7 @@ static void place(Header *h, size_t size)
     size_t old = h->size;
     if (old - size >= MIN_BLOCK) {
         set_block(h, size, 0);
-        Header *next = (Header *)((char *) h + size);
+        Header *next = next_block(h);
         set_block(next, old - size, 1);
     }
     else
@@ -201,6 +202,7 @@ void *mm_malloc(size_t n)
  */
 static Header *coalesce(Header *h)
 {
+<<<<<<< HEAD
     // if both blocks are free
     if (prev_footer(h)->is_free && next_block(h)->is_free) {
         
@@ -211,6 +213,29 @@ static Header *coalesce(Header *h)
     }
     // else if previous is free
     else if (prev_footer(h)->is_free) {
+=======
+    // merging blocks based on free conditions
+    // neither
+    if (!prev_footer(h)->is_free && !next_block(h)->is_free) { return h; }
+    // next only
+    else if (!at_end(next_block(h)) && next_block(h)->is_free && !prev_footer(h)->is_free) {
+        set_block(h, h->size + next_block(h)->size, 1);
+        return h;
+    }
+    // prev only
+    else if (!at_end(next_block(h)) && prev_footer(h)->is_free && !next_block(h)->is_free) {
+        set_block(prev_block(h), prev_block(h)->size + h->size, 1);
+        return prev_block(h);
+    }
+    // both
+    else if (!at_end(next_block(h))) {
+        set_block(prev_block(h), prev_block(h)->size + h->size + next_block(h)->size, 1);
+        return prev_block(h);
+    }
+    else { return NULL; }
+
+}
+>>>>>>> 15110e0333c74e451f5a9bff1084d16b5ba85a25
 
     }
     // else (none)
@@ -238,23 +263,32 @@ void mm_free(void *p)
  *   n == 0:    same as mm_free(p), and return NULL
  */
 void *mm_realloc(void *p, size_t n)
-{
-    /* YOUR CODE HERE */
-    (void)p;
-    (void)n;
-    return NULL;
+{   
+    if (p == NULL) { return mm_malloc(n); }
+    if (n == 0) {
+        mm_free(p);
+        return NULL;
+    }
+    void *cpy = mm_malloc(n);
+    memcpy(cpy, p, MIN(header_of(p)->size - OVERHEAD, n));
+    set_block(header_of(p), header_of(p)->size, 1);
+    return cpy;
 }
-
 /*
  * nmemb * size bytes, all zero. Return NULL if nmemb * size does not fit in
  * a size_t: check that before you multiply.
  */
 void *mm_calloc(size_t nmemb, size_t size)
 {
-    /* YOUR CODE HERE */
-    (void)nmemb;
-    (void)size;
-    return NULL;
+    if (nmemb != 0 && size > SIZE_MAX / nmemb) { return NULL; }
+    else {
+        size_t block_size = nmemb * size;
+        void *addr = mm_malloc(block_size);
+
+        if (addr) { memset(addr, 0, block_size); }
+
+        return addr;
+    }
 }
 
 /* ==================================================================== */
