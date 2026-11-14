@@ -7,6 +7,15 @@
  * how a free block is found, when a block is split, when blocks are
  * coalesced, and, if you did Level 4, how your free list works.
  *
+ * A free block is found by iterating through the heap and checking to see
+ * if 1) the block is free, and 2) if the size is greater than the size you with to allocate.
+ * A block is split when a request for a free block leaves a leftover thats at least MIN_BLOCK.
+ * The old block becomes allocated with the request size and the rest becomes a new block after it.
+ * Blocks are coalesced based on a set of free conditions. They are merged to whichever free block
+ * they're next to: if the next is free, merge. If the previous is free, merge. If the previous and 
+ * next are free, merge to both. If none are free, return the original.
+ *
+ *
  * Rules:
  *   - All memory comes from mem_sbrk(). Do not call malloc, calloc, realloc,
  *     free, sbrk or mmap, and do not declare global or static arrays.
@@ -63,6 +72,7 @@ typedef Header Footer;
 
 static Header *heap_start;  /* the first block */
 static char   *heap_end;    /* one past the last byte of the last block */
+static Header *free_list;
 
 /* ---- Helpers (given). Each is one line of pointer arithmetic. -------- */
 
@@ -173,6 +183,7 @@ int mm_init(void)
     heap_start = (Header *)(fence + 1);
     heap_end = (char *)heap_start;
     /* Level 4: reset your free list(s) here too. */
+    free_list = NULL;
     return 0;
 }
 
@@ -202,18 +213,6 @@ void *mm_malloc(size_t n)
  */
 static Header *coalesce(Header *h)
 {
-<<<<<<< HEAD
-    // if both blocks are free
-    if (prev_footer(h)->is_free && next_block(h)->is_free) {
-        
-    }
-    // else if next is free
-    else if (next_block(h)->is_free) {
-        //
-    }
-    // else if previous is free
-    else if (prev_footer(h)->is_free) {
-=======
     // merging blocks based on free conditions
     // neither
     if (!prev_footer(h)->is_free && !next_block(h)->is_free) { return h; }
@@ -235,13 +234,7 @@ static Header *coalesce(Header *h)
     else { return NULL; }
 
 }
->>>>>>> 15110e0333c74e451f5a9bff1084d16b5ba85a25
 
-    }
-    // else (none)
-    else
-        return h;
-}
 void mm_free(void *p)
 {
     if (p == NULL)
