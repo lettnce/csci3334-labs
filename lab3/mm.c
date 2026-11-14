@@ -201,10 +201,22 @@ void *mm_malloc(size_t n)
  */
 static Header *coalesce(Header *h)
 {
-    /* YOUR CODE HERE */
-    return h;
-}
+    // if both blocks are free
+    if (prev_footer(h)->is_free && next_block(h)->is_free) {
+        
+    }
+    // else if next is free
+    else if (next_block(h)->is_free) {
+        //
+    }
+    // else if previous is free
+    else if (prev_footer(h)->is_free) {
 
+    }
+    // else (none)
+    else
+        return h;
+}
 void mm_free(void *p)
 {
     if (p == NULL)

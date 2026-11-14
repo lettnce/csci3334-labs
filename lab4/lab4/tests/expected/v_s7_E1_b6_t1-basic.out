@@ -1,0 +1,7 @@
+L 0x9064 miss
+S 0x9078 hit
+L 0xb064 miss eviction
+M 0x9064 miss eviction hit
+L 0x90a0 miss
+
+hits:2 misses:4 evictions:2

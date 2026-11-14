@@ -1,0 +1,8 @@
+L 0x10 miss
+M 0x20 miss hit
+S 0x10 hit
+L 0x110 miss eviction
+L 0x10 miss eviction
+M 0x210 miss eviction hit
+
+hits:3 misses:5 evictions:3

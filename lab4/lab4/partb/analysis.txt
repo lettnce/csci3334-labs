@@ -1,0 +1,106 @@
+Lab 4, Part B: Measure It (+10 bonus)
+=====================================
+
+Name:
+
+Run YOUR simulator on the traces named in each question and paste the
+summary line it prints. Then answer in one to three sentences. Copy the
+numbers your csim prints, even if they look wrong to you; the answers are
+graded against them.
+
+Each question is worth 2 points.
+
+Geometry key. The slides describe a cache by its size, line size and ways
+(W). The simulator takes bits. W is -E, sets = 2^s, line size = 2^b bytes,
+and size = 2^s * E * 2^b bytes.
+
+
+Q1. Row-major vs. column-major (Lecture 14)
+-------------------------------------------
+partb/p1-rowsum.tr and partb/p2-colsum.tr sum the same int a[128][128]
+(64 KB), first row by row, then column by column. Use the L1 from the
+Lecture 15 "Cache Parameters" slide: 32 KB, 64-byte lines, 8-way.
+
+    ./csim -s 6 -E 8 -b 6 -t partb/p1-rowsum.tr
+    ./csim -s 6 -E 8 -b 6 -t partb/p2-colsum.tr
+
+  p1 (row):
+  p2 (column):
+
+The row-major miss rate is exactly 1 in some number N. What is N, and
+which cache parameter sets it?
+
+  Answer:
+
+
+Q2. Why the column walk misses every time
+-----------------------------------------
+The matrix (64 KB) is twice the size of the cache (32 KB), so it is tempting
+to call the column misses capacity misses. Test that. Rerun p2 on a fully
+associative cache of the SAME 32 KB size:
+
+    ./csim -s 0 -E 512 -b 6 -t partb/p2-colsum.tr
+
+  p2, fully associative 32 KB:
+
+Which of the three C's were the extra misses in Q1, then? To see why, note
+that one step down a column moves 128 * 4 = 512 bytes. How many different
+sets does one column of a[][] use in the 8-way cache from Q1, and how many
+lines does that leave room for?
+
+  Answer:
+
+
+Q3. The conflict loop from Lecture 15
+-------------------------------------
+traces/t2-conflict.tr is the slide's loop: int a[1024]; int b[1024];
+sum += a[i] + b[i]. The slide says "each iteration evicts the other's
+line". Run three 4 KB caches and one 8 KB cache:
+
+    ./csim -s 6 -E 1  -b 6 -t traces/t2-conflict.tr    4 KB, direct-mapped
+    ./csim -s 5 -E 2  -b 6 -t traces/t2-conflict.tr    4 KB, 2-way
+    ./csim -s 0 -E 64 -b 6 -t traces/t2-conflict.tr    4 KB, fully associative
+    ./csim -s 7 -E 1  -b 6 -t traces/t2-conflict.tr    8 KB, direct-mapped
+
+  direct-mapped 4 KB:
+  2-way 4 KB:
+  fully associative 4 KB:
+  direct-mapped 8 KB:
+
+Does your simulator agree with the slide? The 2-way cache still misses
+some number of times. Which kind of miss are those, and why exactly that
+many?
+
+  Answer:
+
+
+Q4. Blocking (Lecture 15)
+-------------------------
+p4 transposes int A[32][32] into B the obvious way. p5 does the same work
+one 8x8 tile at a time. Use a 1 KB direct-mapped cache with 32-byte lines:
+
+    ./csim -s 5 -E 1 -b 5 -t partb/p4-transpose-naive.tr
+    ./csim -s 5 -E 1 -b 5 -t partb/p5-transpose-blocked.tr
+
+  p4 (naive):
+  p5 (blocked):
+
+Why is 8 the right tile width for this cache? (Look at -b.)
+
+  Answer:
+
+
+Q5. How close to perfect is blocking?
+-------------------------------------
+Run p5 on a fully associative cache of the same size:
+
+    ./csim -s 0 -E 32 -b 5 -t partb/p5-transpose-blocked.tr
+
+  p5, fully associative:
+
+Show that this miss count is the smallest any 32-byte-line cache could
+get on this trace. Then explain where the extra misses in the
+direct-mapped run from Q4 come from. Hint: B starts 16 KB after A. In
+which set does A[i][i] land, and in which does B[i][i]?
+
+  Answer:
