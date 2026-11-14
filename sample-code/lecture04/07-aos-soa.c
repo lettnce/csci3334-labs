@@ -51,7 +51,7 @@ int main(void)
     printf("\nsame answer (%g) both ways, %.1fx apart in time.\n",
            sum_aos == sum_soa ? sum_aos : -1.0, (t1 - t0) / (t2 - t1));
     printf("Four times the bytes, but not four times the time: the hardware\n");
-    printf("prefetcher hides part of a regular stride. Lecture 16 explains how.\n");
+    printf("prefetcher hides part of a regular stride. Lecture 15 explains how.\n");
 
     free(aos);
     free(xs);

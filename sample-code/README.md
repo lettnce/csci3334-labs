@@ -16,6 +16,12 @@ sample code/
   lecture08/   buffer overflows, defenses and undefined behaviour
   lecture09/   the kernel: exceptions, system calls and processes (+ a GPU demo)
   lecture10/   virtual memory: page faults, mmap, copy-on-write and protection
+  lecture11/   the memory allocator: sbrk and the program break
+  lecture12/   system-level I/O: read, write, short reads, stat and buffering
+  lecture13/   file systems: directories, inodes, unlink and fork's shared position
+  lecture14/   locality: stride, row vs. column order and working-set size
+  lecture15/   conflict misses: padding the rows of a matrix
+  lecture16/   lines per set, matrix-multiply loop order and false sharing
 ```
 
 ## Lecture 2
@@ -234,3 +240,131 @@ make run
 | `05-cow.c` | Copy-on-Write · Copy-on-Write in the Page Tables · Practice 3 |
 | `06-protect.c` | Memory Protection · Practice 4 |
 | `07-newlines.c` | Practice 5 (and Answers to Practice 5) |
+
+## Lecture 11
+
+The allocator itself is Lab 3. This directory has the lecture's two system-call
+demos.
+
+```bash
+make
+./01-sbrk
+strace -e trace=brk ./01-sbrk > /dev/null     # Linux only
+strace -e trace=brk,mmap,munmap ./02-malloc-brk-mmap
+```
+
+| File | Slides |
+|------|--------|
+| `01-sbrk.c` | sbrk: Moving the End of the Heap · Run It: sbrk Moves the Break |
+| `02-malloc-brk-mmap.c` | sbrk vs. mmap · Run It: Which One Does malloc Use? (run it under `strace`) |
+
+On macOS `sbrk` is deprecated, and `sbrk(-4096)` does not move the break back.
+The program says which happened.
+
+## Lecture 12
+
+```bash
+make
+make run
+strace -e trace=openat,read,write,close ./01-mycat 01-mycat.c   # Linux only
+(echo hello; sleep 1; echo world) | ./02-short-read
+strace -c -e trace=write ./03-buffering > /dev/null             # Linux only
+ls -l /proc/self/fd                                              # Linux only
+```
+
+| File | Slides |
+|------|--------|
+| `01-mycat.c` | A Complete Loop: cat · Run It: cat in Four System Calls |
+| `02-short-read.c` | A Short Read Is Not an Error · Run It: Short Reads from a Pipe |
+| `03-buffering.c` | Buffered vs. Unbuffered I/O · Run It: One Byte per System Call |
+| `04-stat.c` | File Metadata: stat |
+
+Timings in `03-buffering` depend on the machine. The slide shows an Intel
+i5-6300HQ running Linux; a Mac is slower per system call.
+
+## Lecture 13
+
+```bash
+make
+make run
+./01-myls /                       # . and .. of the root directory
+stat -c '%i %n' / /usr /usr/include /usr/include/stdio.h   # Linux
+stat -f '%i %N' / /usr /usr/bin /usr/bin/true               # macOS
+```
+
+| File | Slides |
+|------|--------|
+| `01-myls.c` | Directory Structure · Run It: Reading a Directory |
+| `02-unlink.c` | Removing a File Is unlink · Run It: A File With No Name |
+| `03-forkpos.c` | File Descriptors Across fork() · Run It: One Position, Two Processes |
+
+The links demo on "Run It: Links and Link Counts" is shell commands only.
+Run it in an empty directory (`cd "$(mktemp -d)"`), not here.
+
+## Lecture 14
+
+Everything builds and runs on Linux and macOS. `make run` takes about 20
+seconds.
+
+```bash
+make
+make run
+getconf LEVEL1_DCACHE_LINESIZE        # block size, Linux
+sysctl hw.cachelinesize               # block size, macOS
+```
+
+| File | Slides |
+|------|--------|
+| `01-stride.c` | Stride-k Reference Patterns · Run It: Stride |
+| `02-rowcol.c` | Row-Major vs. Column-Major · Run It: Row vs. Column Order |
+| `03-workingset.c` | Run It: Time per Load by Working Set Size |
+
+The numbers depend on the machine. The slides show an AMD Ryzen 7 8845HS
+running Linux, whose blocks are 64 bytes. Apple Silicon Macs use 128-byte
+blocks and larger caches, so the steps fall in different places there.
+
+## Lecture 15
+
+Everything builds and runs on Linux and macOS. `make run` takes about one
+second and then prints the cache sizes (`lscpu -C` on Linux, `sysctl` on
+macOS).
+
+```bash
+make
+make run
+```
+
+| File | Slides |
+|------|--------|
+| `01-conflict.c` | Run It: Padding Each Row by One Block |
+
+The slide shows an AMD Ryzen 7 8845HS running Linux, where padding each row
+by one 64-byte block makes the column loop 4 to 7 times faster. The padded
+time stays the same from run to run; the unpadded time does not, because
+it depends on which physical pages the program gets. Apple Silicon Macs
+have 128-byte blocks and much larger caches, and the difference there is
+small.
+
+## Lecture 16
+
+Everything builds and runs on Linux and macOS. `make run` takes about 10
+seconds. The miss counts on the matrix-multiply slide come from `perf`,
+which is Linux only:
+
+```bash
+make
+make run
+perf stat -e L1-dcache-load-misses ./02-matmul kij     # also ijk, jki
+```
+
+| File | Slides |
+|------|--------|
+| `01-ways.c` | Run It: Counting the Lines per Set |
+| `02-matmul.c` | Matrix Multiply: Three Loop Orders · Run It: Matrix Multiply in Three Orders |
+| `03-falseshare.c` | Run It: False Sharing |
+
+`01-ways` shows the step after 8 blocks only on a cache that takes the set
+index from address bits 6 to 11, such as the slide's AMD Ryzen 7 8845HS.
+On an Apple Silicon Mac every row stays at L1 speed. Build `02-matmul`
+with `-DN=1024` to see the power-of-two case from the slide.
+
