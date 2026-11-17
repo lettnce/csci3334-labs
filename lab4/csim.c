@@ -67,6 +67,8 @@ static Line *cache;             /* 2^s * E lines. See cache_init(). */
 static void cache_init(void)
 {
     /* YOUR CODE HERE */
+    cache = calloc(1 << s_bits, sizeof(Line) * E_lines);
+    hits = misses = evictions = 0;
 }
 
 /*
@@ -97,12 +99,45 @@ static void cache_init(void)
  */
 static void access_cache(unsigned long addr, int *did_miss, int *did_evict)
 {
-    /* YOUR CODE HERE */
-    (void)addr;
-    *did_miss = 0;
-    *did_evict = 0;
-}
+    // 1.
+    static unsigned int clock = 0;
+    unsigned long set = (addr >> b_bits) & ((1 << s_bits) - 1);
+    unsigned long tag = addr >> (b_bits + s_bits);
+    Line *invalid = NULL;
+    Line *oldest_line = &cache[set * E_lines + 0];
 
+    clock++;
+    for (int i = 0; i < E_lines; i++) {
+        Line *curr_line = &cache[set * E_lines + i];
+        if (curr_line->valid) {
+            if (oldest_line->last_used > curr_line->last_used) { oldest_line = curr_line; }
+            if (curr_line->tag == tag) {
+                hits++;
+                curr_line->last_used = clock;
+                *did_miss = *did_evict = 0;
+                return;
+            } 
+        }
+        else {
+            invalid = curr_line;
+        }
+        
+    } 
+    misses++;
+    *did_miss = 1;
+    if (!invalid) {
+        evictions++;
+        *did_evict = 1;
+        oldest_line->tag = tag;
+        oldest_line->last_used = clock;
+    }
+    else {
+        *did_evict = 0;
+        invalid->tag = tag;
+        invalid->valid = 1;
+        invalid->last_used = clock;
+    }
+}
 /* ------------------------------------------------------------------------ *
  * LEVEL 2 (15 pts) — associativity
  *
@@ -124,8 +159,8 @@ static void access_cache(unsigned long addr, int *did_miss, int *did_evict)
  */
 static void cache_free(void)
 {
-    /* YOUR CODE HERE */
-    (void)cache;   /* delete this line once you actually use `cache` */
+    
+    free(cache);   /* delete this line once you actually use `cache` */
 }
 
 /* ------------------------------------------------------------------------ *
